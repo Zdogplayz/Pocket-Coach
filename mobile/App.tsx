@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ActivityIndicator, Alert, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, View, Image, ImageBackground} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import {Directory, File, Paths} from 'expo-file-system';
@@ -13,7 +13,7 @@ type Swing = {id: string; date: string; clubId: string; view: 'Face-on' | 'Down-
 type Data = {player: Player | null; clubs: Club[]; rounds: Round[]; swings: Swing[]};
 const KEY = '@fairways/mobile/v1';
 const initial: Data = {player: null, clubs: [], rounds: [], swings: []};
-const K = {bg:'#0b0d0f',surface:'#14171a',card:'#191e20',card2:'#202724',text:'#f4f7f4',muted:'#95a19a',subtle:'#6c7871',green:'#63d471',line:'#2a302d',ink:'#08110a',danger:'#e57e82'};
+const K = {bg:'#0b0d0f',surface:'#1a201e',card:'#1d2421',card2:'#26302b',text:'#f4f7f4',muted:'#8c9690',subtle:'#728079',green:'#63d471',line:'#3b4540',ink:'#08110a',danger:'#e57e82'};
 const id = () => String(Date.now()) + '-' + Math.random().toString(36).slice(2,8);
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString();
 const firstName = (value: string) => value.trim().split(/\s+/)[0] || 'Golfer';
@@ -153,9 +153,14 @@ export default function App() {
  ]);
  if(!loaded)return <SafeAreaView style={s.loading}><ActivityIndicator color={K.green}/><Text style={s.body}>Loading Fairways…</Text></SafeAreaView>;
  if(loadError)return <SafeAreaView style={[s.loading,{padding:24}]}><Text style={s.h2}>Local data needs attention</Text><Body>{loadError}</Body><Body>Existing data has not been overwritten. Reinstalling the application may delete it.</Body></SafeAreaView>;
- return <SafeAreaView style={s.root}><StatusBar barStyle="light-content" backgroundColor={K.bg}/>
- <View style={s.top}><View style={s.monogram}><Text style={{color:K.ink,fontWeight:'900',fontSize:18}}>F</Text></View>
-  <Text style={s.brand}>FAIRWAYS</Text><View style={{flex:1}}/><Text style={s.beta}>POCKET COACH · BETA</Text></View>
+ return <SafeAreaView style={s.root}><StatusBar barStyle="light-content"/>
+ <View style={s.top}>
+   <Image source={require('./assets/fairways-symbol.png')} style={s.brandSymbol} resizeMode="contain" />
+   <Text style={s.brand}>Fairways</Text><View style={{flex:1}}/>
+   {data.player ? <Pressable accessibilityRole="button" accessibilityLabel="Open profile" onPress={()=>setTab('profile')} style={s.avatar}>
+      <Text style={{color:K.text,fontWeight:'800'}}>{data.player.name.trim().slice(0,2).toUpperCase()}</Text>
+   </Pressable> : <Text style={s.beta}>POCKET COACH · BETA</Text>}
+  </View>
  {!data.player ? <Page>
    <Title eyebrow="WELCOME TO FAIRWAYS" title="Build your better game." detail="Your personal golf companion. Start with a local player profile."/>
    <Card highlight><Text style={s.h2}>Your golfer profile</Text>
@@ -167,29 +172,86 @@ export default function App() {
      <Button title="START MY JOURNEY  →" onPress={setup}/>
    </Card><Body>Offline-first preview · No cloud account or AI analysis yet.</Body>
  </Page> : <>
+
  {tab==='home'&&<Page>
-   <View style={s.heroHeading}><View style={{flex:1}}><Label>WELCOME BACK</Label>
-     <Text style={s.pageTitle}>Good to see you, {firstName(data.player.name)}.</Text><Body>Ready to improve your swing?</Body></View>
-     <View style={s.avatar}><Text style={{color:K.text,fontWeight:'800'}}>{data.player.name.trim().slice(0,2).toUpperCase()}</Text></View></View>
-   <View style={s.metrics}><Stat label="HANDICAP" value={data.player.handicap||'—'}/><Stat label="ROUNDS" value={String(roundsFinished.length)}/><Stat label="SWINGS" value={String(data.swings.length)}/></View>
-   <Card highlight><Text style={s.accentLabel}>✦  YOUR AI COACH</Text><Text style={[s.h2,{fontSize:28,marginTop:20}]}>Your Swing Studio</Text>
-    <Body>Record with a consistent face-on or down-the-line angle and build a swing history.</Body>
-    <View style={s.focus}><Label>TODAY'S FOCUS</Label><Text style={s.h2}>Build the baseline</Text>
-      <Body>Capture clear video before we introduce verified pose metrics and coaching feedback.</Body></View>
-    <Button title="START SESSION   →" onPress={()=>setTab('swing')}/></Card>
-   <Section>QUICK ACTIONS</Section><View style={s.grid}>
-    <Pressable style={[s.quick,s.highlight]} onPress={()=>setTab('swing')}><Text style={s.quickIcon}>◎</Text><Text style={s.quickText}>Analyze{'\n'}Swing</Text></Pressable>
-    <Pressable style={s.quick} onPress={()=>setTab('practice')}><Text style={s.quickIcon}>◉</Text><Text style={s.quickText}>Practice</Text></Pressable>
-    <Pressable style={s.quick} onPress={()=>setTab('stats')}><Text style={s.quickIcon}>▥</Text><Text style={s.quickText}>My{'\n'}Stats</Text></Pressable></View>
-   <Section>RECENT PERFORMANCE</Section><Card><View style={s.metrics}>
-      <Stat label="PAR OR BETTER" value={parOrBetter}/><Stat label="SCORED HOLES" value={String(scoredHoles.length)}/></View>
-      <Body>Real scoring statistics from completed rounds. Swing scores will appear after validated analysis is available.</Body>
+   <ImageBackground
+      accessibilityLabel="Golf course hero background"
+      source={{uri:'https://images.unsplash.com/photo-1592919505780-303950717480?auto=format&fit=crop&w=1000&q=85'}}
+      style={s.photoHero} imageStyle={s.photoImage}>
+      <View style={s.photoOverlay}/>
+      <View style={s.photoKicker}><Text style={s.accentLabel}>✦  YOUR DAILY PLAN</Text></View>
+      <View style={s.photoContent}>
+        <Text style={s.heroGreeting}>Good morning, {firstName(data.player.name)}</Text>
+        <Text style={s.photoSubheading}>Ready to improve your swing?</Text>
+        <View style={s.heroScore}><Label>SWING SCORE</Label><Text style={s.heroScoreValue}>—</Text></View>
+      </View>
+   </ImageBackground>
+   <View style={[s.card,s.summaryBand]}>
+     <Stat label="HANDICAP" value={data.player.handicap||'—'}/>
+     <Stat label="ROUNDS" value={String(roundsFinished.length)}/>
+     <Stat label="SWINGS" value={String(data.swings.length)}/>
+   </View>
+   <View style={s.coachCard}>
+      <View style={s.coachGlow}/>
+      <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+        <Text style={s.accentLabel}>✦  AI COACH</Text><Text style={{color:K.green}}>· · ·</Text>
+      </View>
+      <Text style={s.coachHeading}>Your AI Coach</Text>
+      <Text style={s.coachSubtitle}>Let's work on your swing.</Text>
+      <View style={s.focus}>
+        <Text style={s.accentLabel}>TODAY'S FOCUS</Text>
+        <Text style={[s.h2,{marginBottom:6}]}>Build the baseline</Text>
+        <Body>Record consistent face-on or down-the-line swings. Personalized diagnosis becomes available after validated analysis is built.</Body>
+      </View>
+      <Button title="START SESSION   →" onPress={()=>setTab('swing')}/>
+   </View>
+   <View style={s.sectionPanel}>
+      <Section>QUICK ACTIONS</Section>
+      <View style={s.grid}>
+        <Pressable style={[s.quick,s.highlight]} onPress={()=>setTab('swing')}>
+          <Text style={s.quickIcon}>◎</Text><Text style={s.quickText}>Analyze{'\n'}Swing</Text>
+        </Pressable>
+        <Pressable style={s.quick} onPress={()=>setTab('practice')}>
+          <Text style={s.quickIcon}>◉</Text><Text style={s.quickText}>Practice</Text>
+        </Pressable>
+        <Pressable style={s.quick} onPress={()=>Alert.alert('Coming soon','Shot diagnosis requires swing analysis, which is not yet implemented.')}>
+          <Text style={s.quickIcon}>✧</Text><Text style={s.quickText}>Why Did I{'\n'}Hit That?</Text>
+        </Pressable>
+      </View>
+   </View>
+   <View style={s.sectionPanel}>
+      <Text style={s.h2}>Recent Performance</Text>
+      <View style={[s.card,{flexDirection:'row',alignItems:'center',gap:18}]}>
+        <View style={s.scoreRing}><Text style={s.scoreRingValue}>{parOrBetter}</Text></View>
+        <View style={{flex:1}}>
+          <Label>PAR OR BETTER</Label><Body>Across completed rounds</Body>
+          <Row left="Rounds" right={String(roundsFinished.length)}/>
+          <Row left="Scored holes" right={String(scoredHoles.length)}/>
+        </View>
+      </View>
+      <Body>Swing analysis scores will appear after measurements are validated.</Body>
+   </View>
+   <Card>
+      <Text style={s.h2}>Your Progress</Text>
+      <View style={s.metrics}>
+        <Stat label="FINISHED ROUNDS" value={String(roundsFinished.length)}/>
+        <Stat label="SAVED SWINGS" value={String(data.swings.length)}/>
+      </View>
+      <Body>Build a history of swings and rounds to see measurable progress here.</Body>
    </Card>
-   <Section>YOUR NEXT ROUND</Section><Card><Text style={s.h2}>{round?'Continue '+round.course:'Track every hole'}</Text>
-     <Body>{round?String(HoleCount(round))+' / '+round.holes.length+' holes recorded':'Create a nine- or eighteen-hole scorecard.'}</Body>
-     <Button title={round?'CONTINUE ROUND':'START ROUND'} onPress={()=>setTab('stats')} secondary/></Card>
+   <Card>
+      <Text style={s.h2}>{round?'Continue '+round.course:'Track your next round'}</Text>
+      <Body>{round?String(HoleCount(round))+' / '+round.holes.length+' holes recorded':'Create a nine- or eighteen-hole scorecard.'}</Body>
+      <Button title={round?'CONTINUE ROUND':'START ROUND'} onPress={()=>setTab('stats')} secondary/>
+   </Card>
+   {data.swings.length>0&&<Card>
+      <Text style={s.h2}>Last Session</Text>
+      <Row left="Recorded" right={formatDate(data.swings[0].date)}/>
+      <Row left="View" right={data.swings[0].view}/>
+      <Button title="VIEW SWING HISTORY  →" onPress={()=>setTab('swing')} secondary/>
+   </Card>}
  </Page>}
- {tab==='swing'&&<Page>
+  {tab==='swing'&&<Page>
    <Title eyebrow="AI SWING LAB" title="Record Your Swing" detail="Use a consistent camera angle for reliable future measurements."/>
    <View style={s.camera}><View style={s.frame}><Text style={{color:K.green,fontSize:58}}>◎</Text>
        <Text style={{color:K.text,fontWeight:'700',marginTop:8}}>POSITION YOUR PHONE</Text>
@@ -280,13 +342,30 @@ export default function App() {
 }
 const s=StyleSheet.create({
  root:{flex:1,backgroundColor:K.bg},loading:{flex:1,backgroundColor:K.bg,justifyContent:'center',alignItems:'center',gap:20},
- top:{height:58,paddingHorizontal:20,flexDirection:'row',alignItems:'center',borderBottomWidth:1,borderBottomColor:K.line,gap:9},
- monogram:{height:31,width:31,backgroundColor:K.green,borderRadius:9,alignItems:'center',justifyContent:'center'},
- brand:{color:K.text,fontSize:17,fontWeight:'900',letterSpacing:2},beta:{color:K.subtle,fontSize:9,fontWeight:'800',letterSpacing:1},
+ top:{height:80,paddingHorizontal:20,flexDirection:'row',alignItems:'center',gap:7},
+ brandSymbol:{height:34,width:34},
+ brand:{color:'#cbbf86',fontSize:18,fontWeight:'900',letterSpacing:-.6},beta:{color:K.subtle,fontSize:9,fontWeight:'800',letterSpacing:1},
  pageTitle:{fontSize:29,fontWeight:'700',color:K.text,letterSpacing:-.8,marginTop:7,marginBottom:8},
  label:{fontSize:10,color:K.subtle,letterSpacing:1.4,fontWeight:'800',marginBottom:6},
  body:{fontSize:13,color:K.muted,lineHeight:20,marginBottom:5},h2:{fontSize:18,color:K.text,fontWeight:'700',marginBottom:9},
  card:{backgroundColor:K.card,borderColor:K.line,borderWidth:1,borderRadius:19,padding:19,gap:9},
+ summaryBand:{flexDirection:'row',gap:12,marginTop:0,paddingVertical:16},
+ photoHero:{height:292,borderRadius:23,backgroundColor:K.card2,overflow:'hidden',justifyContent:'space-between'},
+ photoImage:{borderRadius:23},
+ photoOverlay:{...StyleSheet.absoluteFillObject,backgroundColor:'rgba(7,13,10,0.58)'},
+ photoKicker:{alignSelf:'flex-start',paddingHorizontal:13,paddingVertical:9,marginTop:18,marginLeft:16,backgroundColor:'rgba(7,13,10,.75)',borderRadius:11,borderWidth:1,borderColor:'#437850'},
+ photoContent:{padding:22,paddingBottom:25},
+ heroGreeting:{color:K.text,fontSize:27,fontWeight:'800',letterSpacing:-.8,maxWidth:270},
+ photoSubheading:{color:'#cbd7cd',fontSize:13,marginTop:6},
+ heroScore:{position:'absolute',right:22,bottom:22,alignItems:'flex-end',paddingLeft:12,borderLeftWidth:1,borderLeftColor:'#579b62'},
+ heroScoreValue:{color:K.green,fontSize:26,fontWeight:'800'},
+ coachCard:{minHeight:302,padding:22,borderRadius:22,overflow:'hidden',backgroundColor:K.card2,borderWidth:1,borderColor:'#396a49',marginBottom:0,justifyContent:'space-between'},
+ coachGlow:{position:'absolute',top:50,left:0,height:115,width:3,backgroundColor:K.green},
+ coachHeading:{fontSize:25,fontWeight:'700',letterSpacing:-.7,color:K.text,marginTop:10},
+ coachSubtitle:{fontSize:14,color:K.muted,marginTop:-3},
+ sectionPanel:{padding:18,backgroundColor:'#171d1a',borderWidth:1,borderColor:K.line,borderRadius:19,gap:13},
+ scoreRing:{height:98,width:98,borderRadius:49,borderWidth:6,borderColor:'#437850',alignItems:'center',justifyContent:'center'},
+ scoreRingValue:{color:K.green,fontSize:24,fontWeight:'800'},
  highlight:{backgroundColor:K.card2,borderColor:'#376348'},
  button:{minHeight:48,backgroundColor:K.green,borderRadius:12,justifyContent:'center',alignItems:'center',paddingHorizontal:14,marginTop:6},
  buttonSecondary:{backgroundColor:K.surface,borderColor:K.line,borderWidth:1},
