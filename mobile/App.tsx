@@ -306,7 +306,7 @@ export default function App() {
      <View style={s.options}>{['Hit a draw','More distance','Fix my slice'].map(t=>
        <Chip key={t} label={t} selected={coachPrompt===t} onPress={()=>setCoachPrompt(t)}/>)}</View>
      <Button title="ASK FAIRWAYS  →" secondary onPress={()=>Alert.alert('Coming soon','AI coaching is not connected yet.')}/></Card>
-   <Section>SAVED SWINGS · {data.swings.length}</Section>{!data.swings.length?<Body>No recordings saved yet.</Body>:
+   <Section>{`SAVED SWINGS · ${data.swings.length}`}</Section>{!data.swings.length?<Body>No recordings saved yet.</Body>:
      data.swings.slice(0,12).map(sw=><Card key={sw.id}><Row left={formatDate(sw.date)} right={sw.view}/>
        <Body>{data.clubs.find(c=>c.id===sw.clubId)?.name||'Unknown club'} · Video saved on this device</Body></Card>)}
  </Page>}
