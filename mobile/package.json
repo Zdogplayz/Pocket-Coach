@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "check": "tsc --noEmit",
-    "doctor": "expo install --check"
+    "doctor": "expo install --check",
+    "check:native-text": "node scripts/check-native-text.cjs"
   },
   "dependencies": {
     "expo": "^58.0.0",
