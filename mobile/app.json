@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Fairways Pocket Coach",
+    "slug": "fairways-pocket-coach",
+    "scheme": "fairways",
+    "version": "0.2.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Record golf swing videos for your local swing history.",
+        "NSPhotoLibraryUsageDescription": "Import your golf swing recordings for your local swing history."
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Import swing videos to your local swing history.",
+          "cameraPermission": "Record a golf swing video."
+        }
+      ]
+    ]
+  }
+}
