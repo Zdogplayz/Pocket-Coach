@@ -352,7 +352,7 @@ const s=StyleSheet.create({
  summaryBand:{flexDirection:'row',gap:12,marginTop:0,paddingVertical:16},
  photoHero:{height:292,borderRadius:23,backgroundColor:K.card2,overflow:'hidden',justifyContent:'space-between'},
  photoImage:{borderRadius:23},
- photoOverlay:{...StyleSheet.absoluteFillObject,backgroundColor:'rgba(7,13,10,0.58)'},
+ photoOverlay:{position:'absolute',top:0,left:0,right:0,bottom:0,backgroundColor:'rgba(7,13,10,0.58)'},
  photoKicker:{alignSelf:'flex-start',paddingHorizontal:13,paddingVertical:9,marginTop:18,marginLeft:16,backgroundColor:'rgba(7,13,10,.75)',borderRadius:11,borderWidth:1,borderColor:'#437850'},
  photoContent:{padding:22,paddingBottom:25},
  heroGreeting:{color:K.text,fontSize:27,fontWeight:'800',letterSpacing:-.8,maxWidth:270},
