@@ -10,9 +10,10 @@ type Club = {id: string; name: string; active: boolean};
 type Hole = {number: number; par: number; strokes: number | null};
 type Round = {id: string; course: string; holes: Hole[]; finished: boolean; date: string};
 type Swing = {id: string; date: string; clubId: string; view: 'Face-on' | 'Down-the-line'; videoUri: string};
-type Data = {player: Player | null; clubs: Club[]; rounds: Round[]; swings: Swing[]};
+type PracticeSession = {id: string; drill: string; date: string; reps: number};
+type Data = {player: Player | null; clubs: Club[]; rounds: Round[]; swings: Swing[]; practiceSessions: PracticeSession[]};
 const KEY = '@fairways/mobile/v1';
-const initial: Data = {player: null, clubs: [], rounds: [], swings: []};
+const initial: Data = {player: null, clubs: [], rounds: [], swings: [], practiceSessions: []};
 const K = {bg:'#0b0d0f',surface:'#1a201e',card:'#1d2421',card2:'#26302b',text:'#f4f7f4',muted:'#8c9690',subtle:'#728079',green:'#63d471',line:'#3b4540',ink:'#08110a',danger:'#e57e82'};
 const id = () => String(Date.now()) + '-' + Math.random().toString(36).slice(2,8);
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString();
@@ -67,6 +68,10 @@ export default function App() {
  const [clubInput,setClubInput] = useState('');
  const [courseInput,setCourseInput] = useState('');
  const [practice,setPractice] = useState('');
+ const [practiceReps,setPracticeReps] = useState('10');
+ const [statsPeriod,setStatsPeriod] = useState<'7 DAYS'|'30 DAYS'|'ALL TIME'>('30 DAYS');
+ const [coachPrompt,setCoachPrompt] = useState('');
+ const [editingProfile,setEditingProfile] = useState(false);
  const [working,setWorking] = useState(false);
  const [formName,setFormName] = useState('');
  const [formHand,setFormHand] = useState<'right'|'left'>('right');
@@ -77,7 +82,7 @@ export default function App() {
    let active=true;
    AsyncStorage.getItem(KEY).then(raw=>{
      if(!active)return;
-     if(raw){const parsed=JSON.parse(raw) as Data; if(!parsed || !Array.isArray(parsed.clubs) || !Array.isArray(parsed.rounds) || !Array.isArray(parsed.swings))throw Error('Saved profile format is invalid'); setData(parsed);}
+     if(raw){const parsed=JSON.parse(raw) as Data; if(!parsed || !Array.isArray(parsed.clubs) || !Array.isArray(parsed.rounds) || !Array.isArray(parsed.swings))throw Error('Saved profile format is invalid'); setData({...initial,...parsed,practiceSessions:Array.isArray(parsed.practiceSessions)?parsed.practiceSessions:[]});}
      setLoaded(true);
    }).catch(e=>{if(active){setLoadError(String(e));setLoaded(true);}});
    return ()=>{active=false;};
@@ -89,7 +94,34 @@ export default function App() {
  const round=data.rounds.find(r=>!r.finished);
  const scoredHoles=roundsFinished.flatMap(r=>r.holes.filter(h=>h.strokes!==null));
  const parOrBetter=scoredHoles.length ? Math.round(100*scoredHoles.filter(h=>(h.strokes||0)<=h.par).length/scoredHoles.length)+'%' : '—';
+ const inPeriod=(date:string)=>{
+   if(statsPeriod==='ALL TIME')return true;
+   const t=Date.parse(date);
+   return Number.isFinite(t)&&t>=Date.now()-(statsPeriod==='7 DAYS'?7:30)*86400000;
+ };
+ const periodRounds=roundsFinished.filter(r=>inPeriod(r.date));
+ const periodHoles=periodRounds.flatMap(r=>r.holes.filter(h=>h.strokes!==null));
+ const periodPar=periodHoles.length?Math.round(100*periodHoles.filter(h=>(h.strokes||0)<=h.par).length/periodHoles.length)+'%':'—';
+ const periodBirdies=periodHoles.filter(h=>(h.strokes||0)<h.par).length;
+ const periodSwings=data.swings.filter(sw=>inPeriod(sw.date));
  const validHandicap = (value:string)=>value.trim()==='' || (Number.isFinite(Number(value)) && Number(value)>=-10 && Number(value)<=54);
+ const beginEdit=()=>{
+   if(!data.player)return;
+   setFormName(data.player.name);setFormHand(data.player.hand);setFormLevel(data.player.experience);
+   setFormUnits(data.player.units);setFormHandicap(data.player.handicap);setEditingProfile(true);
+ };
+ const saveEdit=()=>{
+   if(!formName.trim())return Alert.alert('Enter a name');
+   if(!validHandicap(formHandicap))return Alert.alert('Invalid handicap','Use a number from -10 to 54 or leave blank.');
+   change(old=>({...old,player:{name:formName.trim(),hand:formHand,experience:formLevel,units:formUnits,handicap:formHandicap.trim()}}));
+   setEditingProfile(false);
+ };
+ const completePractice=()=>{
+   const reps=Number(practiceReps);
+   if(!Number.isInteger(reps)||reps<1||reps>500)return Alert.alert('Invalid count','Enter 1 to 500 completed swings.');
+   change(old=>({...old,practiceSessions:[{id:id(),drill:practice,date:new Date().toISOString(),reps},...old.practiceSessions]}));
+   setPractice('');setPracticeReps('10');Alert.alert('Session saved',reps+' practice swings logged.');
+ };
  const setup=()=>{
    if(!formName.trim())return Alert.alert('Name required','Enter your name to continue.');
    if(!validHandicap(formHandicap))return Alert.alert('Invalid handicap','Use a value between -10 and 54, or leave it blank.');
