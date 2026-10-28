@@ -381,7 +381,7 @@ export default function App() {
      <Label>UNITS</Label><Choice value={formUnits} options={['yards','meters']} select={v=>setFormUnits(v as 'yards'|'meters')}/>
      <Field label="Handicap" value={formHandicap} onChange={setFormHandicap} keyboardType="decimal-pad"/>
      <Button title="SAVE PROFILE" onPress={saveEdit}/>
-     <Button title="CANCEL" secondary onPress={()=>setEditingProfile(false)}/></Card>
+     <Button title="CANCEL" secondary onPress={()=>setEditingProfile(false)}/></Card>}
    <Card highlight><View style={{flexDirection:'row',alignItems:'center',gap:14}}><View style={s.avatar}>
      <Text style={s.rowStrong}>{data.player.name.slice(0,2).toUpperCase()}</Text></View>
      <View style={{flex:1}}><Text style={s.h2}>{data.player.name}</Text>
