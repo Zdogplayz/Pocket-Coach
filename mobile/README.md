@@ -2,7 +2,7 @@
 
 This is the **mobile** app. The original root-level App.tsx and index.css are the existing **web design prototype** and are intentionally preserved.
 
-The mobile UI ports the dark Fairways styling from that prototype (background #0b0d0f, accent #63d471, five-tab layout). No Figma design-file ID was available, so this is based on the actual checked-in web UI rather than a pixel-verified Figma handoff.
+The mobile UI is adapted from the connected Figma Make project: https://www.figma.com/make/dCBmeO7y9T6FnEEWZf0dAH/Design-Fairways-Mobile-App . The Figma Make export is a React/Vite web app, not React Native; this folder ports the same design language (background #0b0d0f, accent #63d471, dark green cards, Fairways logo, coach module and five-tab layout) to Expo. The photo hero references the same Unsplash image as the Make source and requires internet access. This is an incremental implementation, not yet an exact pixel-for-pixel clone of every Make screen.
 
 ## Windows / Expo Go (SDK 58)
 
@@ -38,4 +38,4 @@ Expo Go supports the chosen JavaScript and Expo APIs, but full native-device tes
 - Repo root: Fairways React web prototype (existing)
 - mobile/: Expo SDK 58 native mobile app (this branch)
 
-For the exact design-to-code pass, supply a Figma /design/... URL with a selected node. The connected Figma integration can then extract screenshots and design tokens.
+The Figma Make source contains a demo with fictional swing/AI scores. The native app intentionally omits those sample measurements and keeps the underlying Phase 1 data model truthful. Next steps: finish design QA on an iPhone, add account/auth model, and build validated swing pose measurement before coaching outcomes.
