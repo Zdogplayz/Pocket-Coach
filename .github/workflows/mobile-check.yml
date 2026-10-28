@@ -22,4 +22,5 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npx expo install --check
       - run: npm run check
+      - run: npm run check:native-text
       - run: npx expo export --platform ios --output-dir /tmp/fairways-ios-bundle
