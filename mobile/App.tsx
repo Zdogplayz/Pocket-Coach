@@ -266,7 +266,7 @@ export default function App() {
    <Card>
       <Text style={s.h2}>Your Progress</Text>
       <View style={s.metrics}>
-        <Stat label="FINISHED ROUNDS" value={String(roundsFinished.length)}/>
+        <Stat label="FINISHED ROUNDS" value={String(periodRounds.length)}/>
         <Stat label="SAVED SWINGS" value={String(data.swings.length)}/>
       </View>
       <Body>Build a history of swings and rounds to see measurable progress here.</Body>
@@ -285,7 +285,8 @@ export default function App() {
  </Page>}
   {tab==='swing'&&<Page>
    <Title eyebrow="AI SWING LAB" title="Record Your Swing" detail="Use a consistent camera angle for reliable future measurements."/>
-   <View style={s.camera}><View style={s.frame}><Text style={{color:K.green,fontSize:58}}>◎</Text>
+   <View style={s.camera}><View style={{alignItems:'center',paddingBottom:8}}>
+     <Text style={s.accentLabel}>●  READY TO CAPTURE</Text></View><View style={s.frame}><Text style={{color:K.green,fontSize:58}}>◎</Text>
        <Text style={{color:K.text,fontWeight:'700',marginTop:8}}>POSITION YOUR PHONE</Text>
        <Text style={{color:K.muted,fontSize:12,marginTop:5}}>Keep your whole body and club in frame.</Text></View>
        <View style={s.switchRow}><Chip label="FACE-ON" selected={view==='Face-on'} onPress={()=>setView('Face-on')}/>
@@ -298,14 +299,29 @@ export default function App() {
    <Card><Text style={s.accentLabel}>✦  COMING NEXT</Text><Text style={s.h2}>Automatic swing analysis</Text>
       <Body>Pose landmarks, swing phases, posture and movement metrics, followed by coaching observations with confidence checks.</Body>
       <Body>No analysis has been performed on your videos yet.</Body></Card>
-   <Section>SAVED SWINGS</Section>{!data.swings.length?<Body>No recordings saved yet.</Body>:
+   <Card><Text style={s.accentLabel}>✦  ASK FAIRWAYS</Text><Text style={s.h2}>Ask your AI Coach</Text>
+     <Body>Coaching responses are planned, not active yet.</Body>
+     <TextInput style={[s.input,{height:85,textAlignVertical:'top'}]} multiline value={coachPrompt}
+       onChangeText={setCoachPrompt} placeholder="What would you like to work on?" placeholderTextColor={K.subtle}/>
+     <View style={s.options}>{['Hit a draw','More distance','Fix my slice'].map(t=>
+       <Chip key={t} label={t} selected={coachPrompt===t} onPress={()=>setCoachPrompt(t)}/>)}</View>
+     <Button title="ASK FAIRWAYS  →" secondary onPress={()=>Alert.alert('Coming soon','AI coaching is not connected yet.')}/></Card>
+   <Section>SAVED SWINGS · {data.swings.length}</Section>{!data.swings.length?<Body>No recordings saved yet.</Body>:
      data.swings.slice(0,12).map(sw=><Card key={sw.id}><Row left={formatDate(sw.date)} right={sw.view}/>
        <Body>{data.clubs.find(c=>c.id===sw.clubId)?.name||'Unknown club'} · Video saved on this device</Body></Card>)}
  </Page>}
  {tab==='stats'&&<Page>
-   <Title eyebrow="PERFORMANCE" title="Your Stats" detail="Track real rounds and club information over time."/>
+   <Title eyebrow="PERFORMANCE" title="Your Stats" detail="Real performance from your saved rounds and recordings."/>
+   <View style={{flexDirection:'row',padding:5,borderRadius:12,backgroundColor:K.surface,gap:4}}>
+   {(['7 DAYS','30 DAYS','ALL TIME'] as const).map(p=><Pressable key={p} onPress={()=>setStatsPeriod(p)}
+     style={{flex:1,alignItems:'center',paddingVertical:10,borderRadius:9,backgroundColor:statsPeriod===p?K.card2:'transparent'}}>
+     <Text style={{color:statsPeriod===p?K.green:K.muted,fontSize:11,fontWeight:'800'}}>{p}</Text></Pressable>)}</View>
+   <Card highlight><Label>SWINGS CAPTURED · {statsPeriod}</Label><Text style={{color:K.green,fontSize:34,fontWeight:'800'}}>{periodSwings.length}</Text>
+    <Body>Videos recorded in this period; swing quality metrics await verified analysis.</Body></Card>
    <View style={s.metrics}><Card><Stat label="FINISHED ROUNDS" value={String(roundsFinished.length)}/></Card>
-      <Card><Stat label="PAR OR BETTER" value={parOrBetter}/></Card></View>
+      <Card><Stat label="PAR OR BETTER" value={periodPar}/></Card></View>
+   <View style={{padding:15,backgroundColor:'#20392a',borderRadius:13}}>
+    <Text style={s.accentLabel}>✦  PERIOD SUMMARY</Text><Body>{periodHoles.length} holes scored · {periodBirdies} birdies or better</Body></View>
    <Section>ROUND TRACKER</Section>
    {!round&&<Card><Text style={s.h2}>Start a round</Text>
       <Field label="Course" value={courseInput} onChange={setCourseInput} placeholder="Practice round"/>
@@ -331,7 +347,10 @@ export default function App() {
        <Body>{formatDate(r.date)} · {r.finished?'Finished':'In progress'} · {Summary(r).done} holes played</Body></Card>)}
  </Page>}
  {tab==='practice'&&<Page>
-   <Title eyebrow="TRAINING" title="Practice" detail="Build good habits, one drill at a time."/>
+   <Title eyebrow="TRAINING" title="Practice" detail="Build good habits, one focused session at a time."/>
+   <Card><View style={{flexDirection:'row',justifyContent:'space-between'}}><Label>COMPLETED SESSIONS</Label>
+   <Text style={s.accentLabel}>{data.practiceSessions.length}</Text></View><Label>TOTAL PRACTICE SWINGS</Label>
+   <Text style={{color:K.green,fontSize:30,fontWeight:'700'}}>{data.practiceSessions.reduce((n,p)=>n+p.reps,0)}</Text></Card>
    <Card highlight><Text style={s.accentLabel}>✦  START HERE</Text><Text style={[s.h2,{fontSize:26}]}>Clubface Awareness</Text>
       <Body>Start with smooth half swings, pause at waist height, and check the face orientation. This is a general drill, not an AI diagnosis.</Body>
       <Button title="VIEW DRILL" onPress={()=>setPractice('Clubface Awareness')}/></Card>
@@ -343,13 +362,30 @@ export default function App() {
         <View style={{flex:1}}><Text style={s.rowStrong}>{name}</Text><Text style={{color:K.muted,fontSize:12,marginTop:4}}>{detail}</Text></View><Text style={{color:K.green}}>›</Text></Pressable>)}
    {practice&&<Card><Text style={s.accentLabel}>SELECTED DRILL</Text><Text style={s.h2}>{practice}</Text>
      <Body>Record three to five controlled swings and compare your setup and motion across repetitions. Automated feedback is not yet enabled.</Body>
-     <Button title="OPEN SWING STUDIO" onPress={()=>setTab('swing')}/></Card>}
+     <Button title="OPEN SWING STUDIO" secondary onPress={()=>setTab('swing')}/>
+     <Field label="Swings completed" value={practiceReps} onChange={setPracticeReps} keyboardType="decimal-pad"/>
+     <Button title="LOG PRACTICE SESSION  ✓" onPress={completePractice}/></Card>}
+   <Section>PRACTICE HISTORY</Section>
+   {!data.practiceSessions.length?<Body>No practice sessions recorded yet.</Body>:
+     data.practiceSessions.slice(0,12).map(p=><Card key={p.id}>
+       <Text style={s.rowStrong}>{p.drill}</Text><Row left={formatDate(p.date)} right={p.reps+' swings'}/></Card>)}
  </Page>}
  {tab==='profile'&&<Page>
    <Title eyebrow="ACCOUNT" title="Profile"/>
+   <Pressable onPress={beginEdit} style={{alignSelf:'flex-end',borderWidth:1,borderColor:K.line,borderRadius:10,padding:10}}>
+     <Text style={{color:K.green,fontWeight:'800'}}>EDIT MY PROFILE</Text></Pressable>
+   {editingProfile&&<Card highlight><Text style={s.h2}>Edit your golfer profile</Text>
+     <Field label="Name" value={formName} onChange={setFormName}/>
+     <Label>HANDEDNESS</Label><Choice value={formHand} options={['right','left']} select={v=>setFormHand(v as 'right'|'left')}/>
+     <Label>EXPERIENCE</Label><Choice value={formLevel} options={['Beginner','Intermediate','Advanced']} select={setFormLevel}/>
+     <Label>UNITS</Label><Choice value={formUnits} options={['yards','meters']} select={v=>setFormUnits(v as 'yards'|'meters')}/>
+     <Field label="Handicap" value={formHandicap} onChange={setFormHandicap} keyboardType="decimal-pad"/>
+     <Button title="SAVE PROFILE" onPress={saveEdit}/>
+     <Button title="CANCEL" secondary onPress={()=>setEditingProfile(false)}/></Card>
    <Card highlight><View style={{flexDirection:'row',alignItems:'center',gap:14}}><View style={s.avatar}>
      <Text style={s.rowStrong}>{data.player.name.slice(0,2).toUpperCase()}</Text></View>
-     <View><Text style={s.h2}>{data.player.name}</Text><Body>{data.player.experience} · {data.player.hand==='right'?'Right-handed':'Left-handed'}</Body></View></View>
+     <View style={{flex:1}}><Text style={s.h2}>{data.player.name}</Text>
+     <Body>{data.player.experience} · {data.player.hand==='right'?'Right-handed':'Left-handed'}</Body></View></View>
      <Row left="HANDICAP" right={data.player.handicap||'Not set'}/><Row left="DISTANCE UNITS" right={data.player.units}/></Card>
    <Section>MY BAG</Section><Card><View style={s.row}><Text style={s.h2}>Your Clubs</Text><Label>{activeClubs.length} ACTIVE</Label></View>
      <Field label="Add a club" value={clubInput} onChange={setClubInput} placeholder="e.g. 7 Iron"/>
