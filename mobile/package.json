@@ -1,0 +1,27 @@
+{
+  "name": "fairways-pocket-coach",
+  "version": "0.2.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "check": "tsc --noEmit",
+    "doctor": "expo install --check"
+  },
+  "dependencies": {
+    "expo": "^58.0.0",
+    "expo-image-picker": "~58.0.10",
+    "expo-file-system": "~58.0.12",
+    "expo-status-bar": "~58.0.4",
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "react": "19.3.0",
+    "react-native": "0.88.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "@types/react": "^19.2.0",
+    "@types/node": "^22.0.0"
+  }
+}
