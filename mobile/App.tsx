@@ -360,7 +360,7 @@ export default function App() {
       ['Alignment Check','Place a club or alignment stick on the ground pointing at your target.']].map(([name,detail])=>
       <Pressable key={name} onPress={()=>setPractice(name)} style={s.drill}><Text style={s.accentLabel}>◎</Text>
         <View style={{flex:1}}><Text style={s.rowStrong}>{name}</Text><Text style={{color:K.muted,fontSize:12,marginTop:4}}>{detail}</Text></View><Text style={{color:K.green}}>›</Text></Pressable>)}
-   {practice&&<Card><Text style={s.accentLabel}>SELECTED DRILL</Text><Text style={s.h2}>{practice}</Text>
+   {Boolean(practice)&&<Card><Text style={s.accentLabel}>SELECTED DRILL</Text><Text style={s.h2}>{practice}</Text>
      <Body>Record three to five controlled swings and compare your setup and motion across repetitions. Automated feedback is not yet enabled.</Body>
      <Button title="OPEN SWING STUDIO" secondary onPress={()=>setTab('swing')}/>
      <Field label="Swings completed" value={practiceReps} onChange={setPracticeReps} keyboardType="decimal-pad"/>
